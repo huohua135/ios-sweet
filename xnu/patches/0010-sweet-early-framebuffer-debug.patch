@@ -95,8 +95,8 @@ index ccbb188..777aca4 100644
  	mov		x21, #0
  
 +#if defined(SWEET)
-+	/* Stage 0: white 64x32 band, no stack or page tables needed. */
-+	MOV64	x0, (0xd5100000 + 2368 * 12000)
++	/* Stage 0: white 64x32 band on screen, no stack or page tables yet. */
++	MOV64	x0, (0xd5100000 + 100 * 12000)
 +	mov		w1, #-1
 +	mov		x2, #32
 +	mov		x4, #12000
@@ -144,7 +144,7 @@ diff --git a/osfmk/arm64/sweet_early.c b/osfmk/arm64/sweet_early.c
 new file mode 100644
 --- /dev/null
 +++ b/osfmk/arm64/sweet_early.c
-@@ -0,0 +1,142 @@
+@@ -0,0 +1,141 @@
 +/*
 + * Redmi Note 10 Pro bootstrap console. No allocation, locks, ADT parsing or
 + * per-CPU state: panic() can reach this before a current thread exists.
@@ -263,6 +263,7 @@ new file mode 100644
 +void
 +sweet_early_panic(const char *fmt, va_list *args)
 +{
++	(void)args;	/* the raw format string is echoed, args are not */
 +	if (early_disabled || early_panicking) {
 +		return;
 +	}
@@ -271,12 +272,10 @@ new file mode 100644
 +	sweet_early_string(fmt);
 +	sweet_early_putc('\n');
 +	__asm__ volatile("dsb sy" ::: "memory");
-+	va_list copy;
-+	va_copy(copy, *args);
-+	_doprnt(fmt, &copy, sweet_early_putc, 16);
-+	va_end(copy);
-+	sweet_early_putc('\n');
-+	__asm__ volatile("dsb sy" ::: "memory");
++	/* Never come back: a panic loop only makes the screen flicker. */
++	for (;;) {
++		__asm__ volatile("wfe");
++	}
 +}
 +
 +void
