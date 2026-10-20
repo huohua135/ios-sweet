@@ -145,7 +145,7 @@ new file mode 100644
 index 0000000..8f4c808
 --- /dev/null
 +++ b/osfmk/arm64/sweet_early.c
-@@ -0,0 +1,130 @@
+@@ -0,0 +1,133 @@
 +/*
 + * Redmi Note 10 Pro bootstrap console. No allocation, locks, ADT parsing or
 + * per-CPU state: panic() can reach this before a current thread exists.
