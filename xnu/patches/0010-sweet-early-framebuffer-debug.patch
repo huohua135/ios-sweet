@@ -90,18 +90,22 @@ diff --git a/osfmk/arm64/start.s b/osfmk/arm64/start.s
 index ccbb188..777aca4 100644
 --- a/osfmk/arm64/start.s
 +++ b/osfmk/arm64/start.s
-@@ -463,6 +463,25 @@ LEXT(start_first_cpu)
+@@ -463,6 +463,29 @@ LEXT(start_first_cpu)
  	mov		x20, x0
  	mov		x21, #0
  
 +#if defined(SWEET)
-+	/* Stage 0: white 64x32 band on screen, no stack or page tables yet. */
-+	MOV64	x0, (0xd5100000 + 100 * 12000)
-+	mov		w1, #-1
-+	mov		x2, #32
++	/*
++	 * Stage 0: paint the panel solid red before any stack, page table
++	 * or C code exists. Screen red = the kernel was entered and the
++	 * framebuffer base is right; anything else means it never ran.
++	 */
++	MOV64	x0, 0xd5100000
++	MOV64	x1, 0xffff0000
++	mov		x2, #2120
 +	mov		x4, #12000
 +Lsweet_mark_row:
-+	mov		x3, #64
++	mov		x3, #3000
 +	mov		x5, x0
 +Lsweet_mark_pixel:
 +	str		w1, [x5], #4

@@ -1,0 +1,31 @@
+diff --git a/osfmk/kern/startup.c b/osfmk/kern/startup.c
+--- a/osfmk/kern/startup.c
++++ b/osfmk/kern/startup.c
+@@ -687,6 +687,7 @@
+ #ifdef  IOKIT
+ 	kernel_bootstrap_log("PE_init_iokit");
+ 	PE_init_iokit();
++	printf("SWEET: PE_init_iokit returned\n");
+ #endif
+ 
+ 	assert(ml_get_interrupts_enabled() == FALSE);
+@@ -787,6 +788,7 @@
+ 	 *	Start the user bootstrap.
+ 	 */
+ #ifdef  MACH_BSD
++	printf("SWEET: entering bsd_init\n");
+ 	bsd_init();
+ #endif
+ 
+diff --git a/bsd/kern/bsd_init.c b/bsd/kern/bsd_init.c
+--- a/bsd/kern/bsd_init.c
++++ b/bsd/kern/bsd_init.c
+@@ -490,7 +490,7 @@
+ 	platform_stall_panic_or_spin(PLATFORM_STALL_XNU_LOCATION_BSD_INIT);
+ #endif
+ 
+-#define DEBUG_BSDINIT 0
++#define DEBUG_BSDINIT 1
+ 
+ #if DEBUG_BSDINIT
+ #define bsd_init_kprintf(x, ...) kprintf("bsd_init: " x, ## __VA_ARGS__)

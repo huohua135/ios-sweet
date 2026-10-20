@@ -111,7 +111,7 @@ diff --git a/osfmk/arm64/sweet_early.c b/osfmk/arm64/sweet_early.c
  #define EARLY_WIDTH 3000u
  #define EARLY_HEIGHT 2120u
  #define EARLY_STRIDE (12000u / 4)
-@@ -96,18 +98,21 @@
+@@ -96,18 +98,31 @@
  void
  sweet_early_mark(unsigned int stage, const char *label)
  {
@@ -119,6 +119,16 @@ diff --git a/osfmk/arm64/sweet_early.c b/osfmk/arm64/sweet_early.c
 +	if (early_disabled || stage > 20) {
  		return;
  	}
++	if (stage == 1) {
++		/* Whole screen green: arm_init ran and reaches the panel. */
++		for (unsigned int y = 0; y < EARLY_MAPPED_LINES; y++) {
++			volatile uint32_t *line = EARLY_FB + y * EARLY_STRIDE;
++			for (unsigned int x = 0; x < EARLY_WIDTH; x++) {
++				line[x] = 0xff00c000u;
++			}
++		}
++		__asm__ volatile("dsb sy" ::: "memory");
++	}
 -	uint32_t color = 0xff00ff00u | (stage * 28u << 16);
 +	uint32_t color = 0xff00ff00u | ((stage & 7u) * 32u << 16);
  	for (unsigned int y = EARLY_BAND_Y; y < EARLY_BAND_Y + 32; y++) {
