@@ -1,0 +1,36 @@
+diff --git a/bsd/dev/sweet_ufs.c b/bsd/dev/sweet_ufs.c
+--- a/bsd/dev/sweet_ufs.c
++++ b/bsd/dev/sweet_ufs.c
+@@ -64,14 +64,16 @@
+ #define REG_UTRLDBR     0x58
+ #define REG_UTRLCLR     0x5c
+ #define REG_UTRLRSR     0x60
+-#define REG_UTMRLBA     0x64
+-#define REG_UTMRLBAU    0x68
+-#define REG_UTMRLDBR    0x6c
+-#define REG_UTMRLRSR    0x70
+-#define REG_UICCMD      0x80
+-#define REG_UICARG1     0x84
+-#define REG_UICARG2     0x88
+-#define REG_UICARG3     0x8c
++/* UFSHCI 4.0: task management list at 0x70.., UIC command at 0x90.. */
++#define REG_UTMRLBA     0x70
++#define REG_UTMRLBAU    0x74
++#define REG_UTMRLCLR    0x7c
++#define REG_UTMRLDBR    0x78
++#define REG_UTMRLRSR    0x80
++#define REG_UICCMD      0x90
++#define REG_UICARG1     0x94
++#define REG_UICARG2     0x98
++#define REG_UICARG3     0x9c
+ 
+ #define HCS_DP          (1u << 0)
+ #define HCS_UTRLRDY     (1u << 1)
+@@ -446,6 +448,7 @@
+ 	ufs_wr(REG_UTMRLBAU, (uint32_t)(utmrl >> 32));
+ 	ufs_wr(REG_UTRLCLR, ~0u);
+ 	ufs_wr(REG_UTMRLDBR, ~0u);
++	ufs_wr(REG_UTMRLCLR, ~0u);
+ 	ufs_wr(REG_IS, 0xffffffffu);
+ 	ufs_wr(REG_HCE, 1);
+ 	for (int i = 0; i < 1000; i++) {
