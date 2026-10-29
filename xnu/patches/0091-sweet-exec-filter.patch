@@ -1,0 +1,59 @@
+--- a/bsd/kern/kern_exec.c
++++ b/bsd/kern/kern_exec.c
+@@ -2128,6 +2128,42 @@
+  *	<ex_imgact>:???			[anything an imgact can return]
+  *	EDEADLK				Process is being terminated
+  */
++#if defined(SWEET)
++/*
++ * sweetnoexec=name[,name]: refuse to exec these basenames. Stops daemons
++ * that can only crash-loop on this board (no baseband, no activation
++ * record) from eating the single boot CPU.
++ */
++static int
++sweet_exec_blocked(const char *path)
++{
++	static char list[256];
++	static int loaded;
++	const char *base, *p;
++
++	if (!loaded) {
++		loaded = 1;
++		if (!PE_parse_boot_argn("sweetnoexec", list, sizeof(list))) {
++			list[0] = 0;
++		}
++	}
++	if (list[0] == 0 || path == NULL) {
++		return 0;
++	}
++	base = strrchr(path, '/');
++	base = (base != NULL) ? base + 1 : path;
++	for (p = list; *p != 0; ) {
++		const char *end = strchr(p, ',');
++		size_t n = (end != NULL) ? (size_t)(end - p) : strlen(p);
++		if (n > 0 && strlen(base) == n && strncmp(base, p, n) == 0) {
++			return 1;
++		}
++		p = (end != NULL) ? end + 1 : p + n;
++	}
++	return 0;
++}
++#endif /* SWEET */
++
+ static int
+ exec_activate_image(struct image_params *imgp)
+ {
+@@ -2156,6 +2156,13 @@
+ 	error = exec_save_path(imgp, imgp->ip_user_fname, imgp->ip_seg, &excpath);
+ 	if (error) {
+ 		goto bad_notrans;
+ 	}
++
++#if defined(SWEET)
++	if (sweet_exec_blocked(excpath)) {
++		error = EACCES;
++		goto bad_notrans;
++	}
++#endif /* SWEET */
+ 
+ 	/* Use excpath, which contains the copyin-ed exec path */
