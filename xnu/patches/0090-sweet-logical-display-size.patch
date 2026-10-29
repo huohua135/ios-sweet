@@ -1,16 +1,18 @@
 --- a/iokit/Kernel/arm/SweetFramebuffer.cpp
 +++ b/iokit/Kernel/arm/SweetFramebuffer.cpp
-@@ -169,10 +169,10 @@
-	int native = 0;
-	PE_parse_boot_argn("sweetfb_native", &native, sizeof(native));
-	fLogicalW = fWidth;
-	fLogicalH = fHeight;
+@@ -170,12 +170,12 @@
+ 	PE_parse_boot_argn("sweetfb_native", &native, sizeof(native));
+ 	fLogicalW = fWidth;
+ 	fLogicalH = fHeight;
 -	if (!native && fWidth <= SWEET_FB_LOGICAL_W && fHeight <= SWEET_FB_LOGICAL_H) {
 +	if (!native) {
-		fLogicalW = SWEET_FB_LOGICAL_W;
-		fLogicalH = SWEET_FB_LOGICAL_H;
-	}
+ 		fLogicalW = SWEET_FB_LOGICAL_W;
+ 		fLogicalH = SWEET_FB_LOGICAL_H;
+ 	}
 -	fOffX = (int32_t)(fLogicalW - fWidth) / 2;
 -	fOffY = (int32_t)(fLogicalH - fHeight) / 2;
 +	fOffX = 0;
 +	fOffY = 0;
+ 	fLock = IOLockAlloc();
+ 	fClients = OSArray::withCapacity(4);
+ 	fSurface = sweet_surface_create_physical(fPhys, fWidth, fHeight, fRowBytes, SWEET_FB_FORMAT_BGRA);
